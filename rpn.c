@@ -2,63 +2,178 @@
 #include <stdlib.h>
 #include <ctype.h> /* for isdigit(), isspace(), etc */
 #include "Stack.h"
+#include "Function.h"
+#include "TokenType.h"
+#include "rpnStack.h"
+#include "Advstring.h"
 
-void rpn(const char *, struct stack *);
+void rpn(const char *);
+stack* process(const char *, rpnstack*);
 static int readNumber(const char **);
 static char* readToken(const char **);
+int getFunctionHash(char);
+
+Function* Functionlist[52] = {NULL};
 
 int main(void)
 {
   char buffer[1024];
   for (;;) {
-    struct stack stk;
-    init(&stk);
     printf("> ");
     if (fgets(buffer, sizeof(buffer), stdin) == NULL)
       break;
-    rpn(buffer, &stk);
+    rpn(buffer);
   }
   return 0;
 }
 
 /* 逆ポーランド記法で書かれた数式（文字列）を引数にとり、
    その値を表示する関数 */
-void rpn(const char *p, struct stack* st)
+void rpn(const char *p)
 {
-	while (*p != '\0') {
-		if (isdigit(*p)) {
-			int n = readNumber(&p);
-			push(st, n);
-		} else if (*p == '+') {
-			push(st, pop(st) + pop(st));
-		} else if (*p == '*') {
-			push(st, pop(st) * pop(st));
-		}
-		else if (*p == '-') {
-			int rop = pop(st);
-			push(st, pop(st) - rop);
-		}
-		else if (*p == '/') {
-			int rop = pop(st);
-			push(st, pop(st) / rop);
-		}
+    rpnstack st;
+    initrpnStack(&st);
 
+    process(p, &st);
     
+	if (!isEmptyStack(&st.data)) {
+		printf("%d\n", rpnpop(&st).data);
+	}
+}
+
+stack* process(const char* p, rpnstack* stk)
+{
+    bool functionDefFlag = false;
+    char* functionExpr;
+    
+    while (*p != '\0') {
+        char* token = readToken(&p);
+        
+		if (isdigit(*token)) {
+			int n = atoi(token);
+            rpnpush(n, Number, stk);
+		}
+        else if (isalpha(*token)) {
+            rpnpush(token[0], Symbol, stk);
+            
+            /*function difinition*/
+            if (rightcharof(p, 0) == '=' && rightcharof(p, 1) != '=') {
+                functionDefFlag = true;
+                Functionlist[getFunctionHash(token[0])] = newFunction();
+                functionExpr = (char*) calloc(1024, sizeof(char));
+            }
+        }
+
+        if (!functionDefFlag) {
+            if (eqstr(token, "+")) {
+                rpnpush(rpnpop(stk).data + rpnpop(stk).data, Number, stk);
+            }
+            else if (eqstr(token, "*")) {
+                rpnpush(rpnpop(stk).data * rpnpop(stk).data, Number, stk);
+            }
+            else if (eqstr(token, "-")) {
+                int rop = rpnpop(stk).data;
+                
+                rpnpush(rpnpop(stk).data - rop, Number, stk);
+            }
+            else if (eqstr(token, "/")) {
+                int rop = rpnpop(stk).data;
+                
+                rpnpush(rpnpop(stk).data / rop, Number, stk);
+            }
+            else if (eqstr(token, ">")) {
+            }
+            else if (eqstr(token, "==")) {
+            }
+            else if (eqstr(token, "<")) {
+            }
+            else if (eqstr(token, "?")) {
+            }
+        }
+        else {
+            if (eqstr(token, ":")) {
+                rpndata arg = rpnpop(stk);
+                rpndata symbol = rpnpop(stk);
+                if (symbol.type == Symbol) {
+                    Function* f = Functionlist[getFunctionHash(symbol.data)];
+                    if (f == NULL) {
+                        f = newFunction();
+                    }
+                    appendArg(f, (char)arg.data);
+                    rpnpush(symbol.data, symbol.type, stk);
+                }
+            }
+            else if (eqstr(token, "=")) {
+                /*関数代入*/
+                rpndata symbol = rpnpop(stk);
+                Function* fc = Functionlist[getFunctionHash(symbol.data)];
+                bondExpr(fc, functionExpr);
+            }
+            else if (eqstr(token, "\'")) {
+                /*シンボルか？*/
+                rpndata symbol = rpnpop(stk);
+                if (symbol.type == Symbol) {
+                    /*関数適用*/
+                    Function* fc = Functionlist[getFunctionHash(symbol.data)];
+                    if (fc == NULL) {
+                        printf("Error: Function is not defined.\n");
+                        exit(1);
+                    }
+                    /*引数取得*/
+                    rpnstack args;
+                    initrpnStack(&args);
+                    int argc = getFunctionArgs(fc, stk, &args);
+
+                    /*適用*/
+                    for (; argc > 0; argc--) {
+                        fc = apply(fc, rpnpop(&args));
+                    }
+
+                    /*評価*/
+                    process(fc->expr, stk);
+                }
+            }
+        }
+
 		p++;
 		for ( ; *p != '\0'; p++) {
 			if (! isspace(*p))
 				break;
 		}
+
+        free(token);
 	}
-  
-	if (!isEmptyStack(st)) {
-		printf("%d\n", pop(st));
-	}
+}
+
+int getFunctionHash(char c)
+{
+    /*ASCIIと仮定*/
+    /*小文字*/
+    if (c >= 'a' && c <= 'z') {
+        return c - 'a';
+    }
+    /*大文字*/
+    else if (c >= 'A' && c <= 'Z') {
+        return c - 'A';
+    }
+    else {
+        return 0;
+    }
 }
 
 static char* readToken(const char ** psrc)
 {
-	
+	char* p = *psrc;
+    char* token = (char*)calloc(64, sizeof(char));
+    
+    while (*p != '\0' && !isspace(*p)) {
+        *token = *p;
+        token++;
+        p++;
+    }
+    *token = '\0';
+
+    return token;
 }
 
 static int readNumber(const char* * psrc)

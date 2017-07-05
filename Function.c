@@ -6,6 +6,7 @@
 #include "Function.h"
 #include "Advstring.h"
 #include "Queue.h"
+#include "Stack.h"
 
 Function* newFunction()
 {
@@ -25,7 +26,7 @@ Function* cloneFunction(Function* f)
 	cf->args = cloneQueue(f->args);
 }
 
-Function* apply(Function *f, int v)
+Function* apply(Function *f, rpndata v)
 {
 	if (isEmpty(f->args)) {
 		return f;
@@ -39,7 +40,16 @@ Function* apply(Function *f, int v)
 		/*’uŠ·‚ğs‚¤*/
 		for(i = 0; i < strlen(cf->expr); i++) {
 			if (cf->expr[i] == argsymbol) {
-				replacestr(cf->expr, i, i, itoas(v));
+                char* rp;
+                if (v.type == Number) {
+                    rp = itoas(v.data);
+                }
+                else {
+                    rp = (char*) calloc (2, sizeof(char));
+                    rp[0] = v.data;
+                }
+                
+                replacestr(cf->expr, i, i, rp);
 			}
 		}
 		
@@ -58,3 +68,18 @@ void bondExpr(Function* f, char* expr)
 	strcpy(expr, f->expr);
 	return;
 }
+
+int getFunctionArgs(Function* f, rpnstack* stk, rpnstack* argstk)
+{
+    int argc = f->args->count;
+    
+    while (argc > 0) {
+        rpndata tmp = rpnpop(stk);
+        rpnpush(tmp.data, tmp.type, argstk);
+        argc--;
+    }
+
+    return f->args->count;
+}
+
+    

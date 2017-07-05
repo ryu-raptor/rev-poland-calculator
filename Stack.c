@@ -8,7 +8,7 @@ void init(struct stack *st)
   st->top = 0;
 }
 
-void push(struct stack *st, int n)
+void push(int n, struct stack *st)
 {
   /* push の実装 */
   if (st->top > STACKSIZE) {

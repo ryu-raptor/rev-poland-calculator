@@ -10,8 +10,10 @@ struct stack {
   int val[STACKSIZE];
 } ;
 
+typedef struct stack stack;
+
 void init(struct stack *st);
-void push(struct stack *st, int n);
+void push(int n, struct stack *st);
 int pop(struct stack *st);
 bool isEmptyStack(struct stack *st);
 

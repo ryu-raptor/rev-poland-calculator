@@ -11,6 +11,7 @@ typedef struct cell {
 typedef struct {
 	cell* head;
 	cell* tail;
+    int count;
 } Queue;
 
 void initQueue(Queue*);

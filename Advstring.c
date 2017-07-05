@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 static void shiftLeft(char*, int, int);
 static void shiftRight(char*, int, int);
@@ -49,6 +50,23 @@ char* itoas(int n)
 	}
 	
 	return rv;
+}
+
+void addstr(char* dist, char* src)
+{
+    dist = strncat(dist, src, strlen(src));
+}
+
+bool eqstr(char* a, char* b)
+{
+    if (strcmp(a, b) == 0) return true;
+    return false;
+}
+
+char rightcharof(const char* p, int index)
+{
+    int l = strlen(p);
+    return p[l - 1 - index];
 }
 
 static void shiftLeft(char* src, int index, int amount)

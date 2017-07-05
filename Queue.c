@@ -6,6 +6,7 @@ void initQueue(Queue* q)
 {
 	q->head = NULL;
 	q->tail = NULL;
+    q->count = 0;
 }
 
 void enqueue(int n, Queue* q)
@@ -22,6 +23,7 @@ void enqueue(int n, Queue* q)
 		q->tail->next = newc;
 		q->tail = newc;
 	}
+    q->count++;
 }
 
 int dequeue(Queue* q)
@@ -35,6 +37,7 @@ int dequeue(Queue* q)
 		int rv = rvc->data;
 		q->head = q->head->next;
 		free(rvc);
+        q->count--;
 	}
 }
 
