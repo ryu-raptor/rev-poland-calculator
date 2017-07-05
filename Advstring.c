@@ -39,9 +39,10 @@ char* itoas(int n)
 	/*確保*/
 	char* rv = (char*)calloc(digit + (signflag ? 1 : 0) + 1, sizeof(char));
 	/*変換*/
-	for (int i = digit - 1 + signflag ? 1 : 0; n > 0 ; i--) {
+	for (int i = digit - 1 + signflag ? 1 : 0; ; i--) {
 		rv[i] = '0' + (n % 10);
 		n /= 10;
+		if (n == 0) break;
 	}
 	if (signflag) {
 		rv[0] = '-';
