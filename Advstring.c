@@ -6,44 +6,39 @@ static void shiftRight(char*, int, int);
 
 void replacestr(char* src, int from, int to, char* str)
 {
-	/*‹l‚ß‚é‚©L‚°‚é‚©Œˆ‚ß‚ÄÀÛ‚É‚·‚é*/
+	/*è©°ã‚ã‚‹ã‹åºƒã’ã‚‹ã‹æ±ºã‚ã¦å®Ÿéš›ã«ã™ã‚‹*/
 	if (to - from + 1 >= strlen(str)) {
-		/*‹l‚ß‚é*/
+		/*è©°ã‚ã‚‹*/
 		shiftLeft(src, to, to - from + 1 - strlen(str));
 	}
 	else {
-		/*L‚°‚é*/
+		/*åºƒã’ã‚‹*/
 		shiftRight(src, to, strlen(str) - (to - from + 1));
 	}
 	
-	/*‘}“ü‚·‚é*/
+	/*æŒ¿å…¥ã™ã‚‹*/
 	strncpy(str, src + from, strlen(str));
 }
 
 char* itoas(int n)
 {
-	if (n == 0) {
-		char* rv = (char*)calloc(1 + 1, sizeof(char));
-		rv[0] = '0';
-		return rv;
-	}
-	
 	int signflag = 0;
 	if (n < 0) {
 		signflag = 1;
 		n = -n;
 	}
 	
-	/*Œ…”Šm”F*/
+	/*æ¡æ•°ç¢ºèª*/
 	int digit;
 	int tmp = n;
-	for (digit = 0; tmp > 0; digit++) {
+	for (digit = 1; ; digit++) {
 		tmp /= 10;
+		if (tmp == 0) break;
 	}
 	
-	/*Šm•Û*/
+	/*ç¢ºä¿*/
 	char* rv = (char*)calloc(digit + (signflag ? 1 : 0) + 1, sizeof(char));
-	/*•ÏŠ·*/
+	/*å¤‰æ›*/
 	for (int i = digit - 1 + signflag ? 1 : 0; n > 0 ; i--) {
 		rv[i] = '0' + (n % 10);
 		n /= 10;
@@ -67,7 +62,7 @@ static void shiftLeft(char* src, int index, int amount)
 static void shiftRight(char* src, int index, int amount)
 {
 	if (amount == 0) return;
-	/*\0‚ÍŠÜ‚Ü‚È‚¢‚Ì‚Å-1‚µ‚È‚¢*/
+	/*\0ã¯å«ã¾ãªã„ã®ã§-1ã—ãªã„*/
 	for (int i = strlen(src); ; i--) {
 		src[i + amount] = src[i];
 		if (i == index) break;
