@@ -5,6 +5,7 @@
 
 void rpn(const char *, struct stack *);
 static int readNumber(const char **);
+static char* readToken(const char **);
 
 int main(void)
 {
@@ -53,6 +54,11 @@ void rpn(const char *p, struct stack* st)
 	if (!isEmptyStack(st)) {
 		printf("%d\n", pop(st));
 	}
+}
+
+static char* readToken(const char ** psrc)
+{
+	
 }
 
 static int readNumber(const char* * psrc)
