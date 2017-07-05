@@ -163,7 +163,7 @@ int getFunctionHash(char c)
 
 static char* readToken(const char ** psrc)
 {
-	char* p = *psrc;
+	const char* p = *psrc;
     char* token = (char*)calloc(64, sizeof(char));
     
     while (*p != '\0' && !isspace(*p)) {
@@ -178,7 +178,7 @@ static char* readToken(const char ** psrc)
 
 static int readNumber(const char* * psrc)
 {
-	char* p = *psrc;
+	const char* p = *psrc;
 	int tmp = 0, num = 0;
 	int digit = 1;
 
