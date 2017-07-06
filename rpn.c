@@ -57,7 +57,8 @@ stack* process(const char* p, rpnstack* stk)
             rpnpush(token[0], Symbol, stk);
             
             /*function difinition*/
-            if (rightcharof(p, 0) == '=' && rightcharof(p, 1) != '=') {
+            /*改行記号付きのため1と2*/
+            if (rightcharof(p, 1) == '=' && rightcharof(p, 2) != '=') {
                 functionDefFlag = true;
                 Functionlist[getFunctionHash(token[0])] = newFunction();
                 functionExpr = (char*) calloc(1024, sizeof(char));
@@ -66,7 +67,9 @@ stack* process(const char* p, rpnstack* stk)
 
         if (!functionDefFlag) {
             if (eqstr(token, "+")) {
-                rpnpush(rpnpop(stk).data + rpnpop(stk).data, Number, stk);
+                rpndata lop = rpnpop(stk);
+                rpndata rop = rpnpop(stk);
+                rpnpush(lop.data + rop.data, Number, stk);
             }
             else if (eqstr(token, "*")) {
                 rpnpush(rpnpop(stk).data * rpnpop(stk).data, Number, stk);
@@ -163,15 +166,15 @@ int getFunctionHash(char c)
 
 static char* readToken(const char ** psrc)
 {
-	const char* p = *psrc;
     char* token = (char*)calloc(64, sizeof(char));
+    int i = 0;
     
-    while (*p != '\0' && !isspace(*p)) {
-        *token = *p;
-        token++;
-        p++;
+    while ((**psrc) != '\0' && !isspace(**psrc)) {
+        token[i] = **psrc;
+        i++;
+        (*psrc)++;
     }
-    *token = '\0';
+    token[i] = '\0';
 
     return token;
 }

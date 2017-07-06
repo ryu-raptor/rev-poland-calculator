@@ -19,4 +19,6 @@ rpndata rpnpop(rpnstack* st)
     rpndata rv;
     rv.data = pop(&(st->data));
     rv.type = (etype)pop(&(st->type));
+
+    return rv;
 }
